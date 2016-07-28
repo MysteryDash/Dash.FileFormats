@@ -7,15 +7,16 @@ This project has been made to open, read and/or create files from uncommon forma
 We cannot do much, but here's what's available.
 
 Idea Factory's File Formats :
-* Read and extract .PAC
+* Read, extract and create (uncompressed) .PAC
 * Read, extract and create .CL3
-* Convert .TID to common picture formats and common picture format to .TID.
+* Convert .TID to common picture formats and common picture format back to .TID
 
 ## What has yet to be done
 
 We still have a long way to go ! Here's what we need to do :
-* Create new .PAC (uncompressed for now)
-* Fix DXT compression for .TID
+* Add compression support for .PAC
+* Fix DXT1/5 compression for .TID which isn't working for an unknown reason
+* Find an alternative to Neptoolia.Datalayer.Decompressor
 * Test everything
 
 ## About the author
@@ -36,7 +37,7 @@ The following people are contributors of this project :
 ## Versioning
 
 We use [Semantic Versioning 2.0.0](http://semver.org/) for versioning.  
-The current version of this project is the 1.0.0-alpha.
+The current version of this project is the 2.0.0-alpha.
 
 ## License
 

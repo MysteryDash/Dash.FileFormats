@@ -5,7 +5,6 @@
 //
 
 using System;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 
@@ -94,8 +93,8 @@ namespace MysteryDash.FileFormats.IO
 
         protected override void FillBuffer(int numBytes)
         {
-            Contract.Requires<ObjectDisposedException>(BaseStream != null);
-            Contract.Requires<ArgumentOutOfRangeException>((uint)numBytes <= buffer.Length);
+            if ((uint) numBytes > buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(numBytes));
 
             int n, read = 0;
             do

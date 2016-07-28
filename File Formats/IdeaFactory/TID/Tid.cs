@@ -1,10 +1,4 @@
-﻿// 
-// This file is licensed under the terms of the Simple Non Code License (SNCL) 2.0.2.
-// The full license text can be found in the file named License.txt.
-// Written originally by Alexandre Quoniou in 2016.
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Drawing;
@@ -14,88 +8,94 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using ManagedSquish;
-using MysteryDash.FileFormats.Exceptions;
 using MysteryDash.FileFormats.IO;
+using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.TID
 {
     /// <summary>
     /// This class provides methods to handle .TID files.
     /// </summary>
-    public class Tid
+    public class Tid : IFileFormat
     {
         public static readonly Dictionary<int, CompressionState> Versions = new Dictionary<int, CompressionState>
         {
-            { 0x80, CompressionState.Both },
-            { 0x81, CompressionState.CompressedOnly },
-            { 0x82, CompressionState.UncompressedOnly },
-            { 0x88, CompressionState.CompressedOnly },
-            { 0x89, CompressionState.CompressedOnly },
-            { 0x90, CompressionState.Both },
-            { 0x91, CompressionState.CompressedOnly },
-            { 0x92, CompressionState.UncompressedOnly },
-            { 0x93, CompressionState.UncompressedOnly },
-            { 0x98, CompressionState.Both },
-            { 0x99, CompressionState.CompressedOnly },
-            { 0x9A, CompressionState.UncompressedOnly }
+            {0x80, CompressionState.Both},
+            {0x81, CompressionState.CompressedOnly},
+            {0x82, CompressionState.UncompressedOnly},
+            {0x88, CompressionState.CompressedOnly},
+            {0x89, CompressionState.CompressedOnly},
+            {0x90, CompressionState.Both},
+            {0x91, CompressionState.CompressedOnly},
+            {0x92, CompressionState.UncompressedOnly},
+            {0x93, CompressionState.UncompressedOnly},
+            {0x98, CompressionState.Both},
+            {0x99, CompressionState.CompressedOnly},
+            {0x9A, CompressionState.UncompressedOnly}
         };
 
+        public bool Loaded { get; private set; }
         public Bitmap Bitmap { get; set; }
         public CompressionAlgorithm Compression { get; set; }
         public byte[] Filename { get; set; }
         public string ReadableFilename => Encoding.ASCII.GetString(Filename.TakeWhile(c => c != '\0').ToArray());
         public int Height => Bitmap.Height;
         public bool IsLittleEndian => (Version & 0x01) == 0;
-        public uint UncompressedSize => 0x80 + (uint)Width * (uint)Height * 4;
+        public uint UncompressedSize => 0x80 + (uint) Width*(uint) Height*4;
         public byte Version { get; set; }
         public int Width => Bitmap.Width;
 
-        public Tid(Bitmap bitmap, byte[] filename) : this(bitmap, filename, CompressionAlgorithm.None)
+        public Tid()
         {
-
+            
         }
 
-        public Tid(Bitmap bitmap, byte[] filename, CompressionAlgorithm compression) : this(bitmap, filename, compression, 0x90)
-        {
-
-        }
-
-        public Tid(Bitmap bitmap, byte[] filename, CompressionAlgorithm compression, byte version)
+        public Tid(Bitmap bitmap, byte[] filename, CompressionAlgorithm compression = CompressionAlgorithm.None, byte version = 0x90)
         {
             Bitmap = bitmap;
-            Filename = filename;
+            if (filename.Length <= 32)
+            {
+                Filename = new byte[32];
+                filename.CopyTo(Filename, 0);
+            }
+            else
+            {
+                throw new ArgumentException($"{nameof(filename)} must not be longer than 32 characters.");
+            }
             Compression = compression;
             Version = version;
+            Loaded = true;
         }
-
-        public static Tid FromFile(string path)
+    
+        public void LoadFile(string path)
         {
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
             Contract.Requires<FileNotFoundException>(File.Exists(path));
 
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return FromStream(stream);
+                LoadFromStream(stream);
             }
         }
 
-        public static Tid FromBytes(byte[] data)
+        public void LoadBytes(byte[] data)
         {
             Contract.Requires<ArgumentNullException>(data != null);
 
             using (var stream = new MemoryStream(data))
             {
-                return FromStream(stream);
+                LoadFromStream(stream);
             }
         }
 
-        public static Tid FromStream(Stream stream)
+        public void LoadFromStream(Stream stream)
         {
             Contract.Requires<ArgumentNullException>(stream != null);
             Contract.Requires(stream.CanRead);
             Contract.Requires(stream.CanSeek);
             Contract.Requires(stream.Length >= 0x80); // Header Size, Minimum Required
-            Contract.Ensures(Contract.Result<Tid>() != null);
+
+            var origin = stream.Position;
 
             if (stream.ReadByte() != 0x54 || stream.ReadByte() != 0x49 || stream.ReadByte() != 0x44)
                 throw new InvalidDataException("This isn't a TID file.");
@@ -106,30 +106,30 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
 
             using (var reader = new EndianBinaryReader(stream, Encoding.UTF8, true, (version & 0x01) == 0))
             {
-                stream.Seek(0x20, SeekOrigin.Begin);
+                stream.Seek(0x20 + origin, SeekOrigin.Begin);
                 var filename = reader.ReadBytes(32);
 
-                stream.Seek(0x44, SeekOrigin.Begin);
+                stream.Seek(0x44 + origin, SeekOrigin.Begin);
                 var width = reader.ReadInt32();
                 var height = reader.ReadInt32();
 
-                stream.Seek(0x58, SeekOrigin.Begin);
+                stream.Seek(0x58 + origin, SeekOrigin.Begin);
                 var dataLength = reader.ReadInt32();
 
-                stream.Seek(0x64, SeekOrigin.Begin);
+                stream.Seek(0x64 + origin, SeekOrigin.Begin);
                 int compressionValue = reader.ReadInt32();
-                if (!Enum.IsDefined(typeof(CompressionAlgorithm), compressionValue))
+                if (!Enum.IsDefined(typeof (CompressionAlgorithm), compressionValue))
                     throw new InvalidCompressionMethodException($"{compressionValue} represents an incorrect or unknown compression algorithm.");
-                CompressionAlgorithm compression = (CompressionAlgorithm)compressionValue;
+                CompressionAlgorithm compression = (CompressionAlgorithm) compressionValue;
 
                 if (stream.Length < 0x80 + dataLength)
                     throw new EndOfStreamException();
 
-                stream.Seek(0x80, SeekOrigin.Begin);
+                stream.Seek(0x80 + origin, SeekOrigin.Begin);
                 byte[] data;
                 if (version == 0x9A)
                 {
-                    data = reader.ReadBytes(width * height * 4);
+                    data = reader.ReadBytes(width*height*4);
                 }
                 else
                 {
@@ -144,22 +144,22 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                     }
                     else if ((version & 0x02) == 0x02)
                     {
-                        data = SwapColorChannels(data, 3, 2, 1, 0);
+                        data = BitmapArrayTools.Swap32BppColorChannels(data, 3, 2, 1, 0);
                     }
                     else
                     {
-                        data = SwapColorChannels(data, 2, 1, 0, 3);
+                        data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
                     }
                 }
                 else
                 {
                     data = Squish.DecompressImage(data, width, height, compression.ToSquishFlags());
-                    data = SwapColorChannels(data, 2, 1, 0, 3);
+                    data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
                 }
 
                 if (compression == CompressionAlgorithm.Dxt1)
                 {
-                    data = FillAlpha(data, 0, 0xFF);
+                    data = BitmapArrayTools.Fill32BppAlpha(data, 0, 0xFF);
                 }
 
                 var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
@@ -167,69 +167,44 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                 Marshal.Copy(data, 0, bitmapData.Scan0, data.Length);
                 bitmap.UnlockBits(bitmapData);
 
-                return new Tid(bitmap, filename, compression, version);
+                Bitmap = bitmap;
+                Filename = filename;
+                Compression = compression;
+                Version = version;
+
+                Loaded = true;
             }
         }
 
-        private static byte[] SwapColorChannels(byte[] raw, int first, int second, int third, int fourth)
-        {
-            Contract.Requires<ArgumentNullException>(raw != null);
-            Contract.Requires<ArgumentException>(raw.Length % 4 == 0);
-            Contract.Requires<ArgumentOutOfRangeException>(first >= 0 || first <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(second >= 0 || second <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(third >= 0 || third <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(fourth >= 0 || fourth <= 3);
-
-            var length = raw.Length;
-            var output = new byte[length];
-            for (int i = 0; i < length; i += 4)
-            {
-                output[i + 0] = raw[i + first];
-                output[i + 1] = raw[i + second];
-                output[i + 2] = raw[i + third];
-                output[i + 3] = raw[i + fourth];
-            }
-
-            return output;
-        }
-
-        private static byte[] FillAlpha(byte[] raw, int index, byte value)
-        {
-            Contract.Requires<ArgumentNullException>(raw != null);
-            Contract.Requires<ArgumentOutOfRangeException>(index >= 0 && index <= 3);
-
-            for (int i = 0; i < index; i += 4)
-            {
-                raw[i] = value;
-            }
-            return raw;
-        }
-
-        public void ToFile(string path)
+        public void WriteFile(string path)
         {
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             {
-                ToStream(stream);
+                WriteToStream(stream);
             }
         }
 
-        public byte[] ToBytes()
+        public byte[] WriteBytes()
         {
             using (var stream = new MemoryStream())
             {
-                ToStream(stream);
+                WriteToStream(stream);
                 return stream.ToArray();
             }
         }
 
-        public void ToStream(Stream stream)
+        public void WriteToStream(Stream stream)
         {
+            Contract.Requires<FileNotLoadedException>(Loaded);
             Contract.Requires<ArgumentNullException>(stream != null);
             Contract.Requires<ArgumentException>(stream.CanWrite);
             Contract.Requires<ArgumentException>(stream.CanSeek);
             Contract.Requires<InvalidCompressionMethodException>(Compression == CompressionAlgorithm.None, "Compressing is not yet supported !");
+            Contract.Requires<InvalidCompressionMethodException>(Compression == CompressionAlgorithm.None ? Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.UncompressedOnly : Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.CompressedOnly);
+
+            var origin = stream.Position;
 
             using (var writer = new EndianBinaryWriter(stream, new UTF8Encoding(false, true), false, IsLittleEndian))
             {
@@ -242,7 +217,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                 writer.Write(0x01);
                 writer.Write(0x20);
 
-                stream.Seek(0x20, SeekOrigin.Begin);
+                stream.Seek(0x20 + origin, SeekOrigin.Begin);
                 writer.Write(Filename);
                 writer.Write(0x60);
                 writer.Write(Width);
@@ -267,16 +242,16 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                     }
                     else if ((Version & 0x02) == 0x02)
                     {
-                        data = SwapColorChannels(data, 3, 2, 1, 0);
+                        data = BitmapArrayTools.Swap32BppColorChannels(data, 3, 2, 1, 0);
                     }
                     else
                     {
-                        data = SwapColorChannels(data, 2, 1, 0, 3);
+                        data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
                     }
                 }
                 else
                 {
-                    data = SwapColorChannels(data, 2, 1, 0, 3);
+                    data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
                     data = Squish.CompressImage(data, Width, Height, Compression.ToSquishFlags()); // TODO : This line throws a FatalExecutionEngineError for an unknown reason
                 }
 
@@ -298,14 +273,14 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                 }
 
                 // TODO : Understand and write correct data for offsets 0x68 and 0x78
-                stream.Seek(0x78, SeekOrigin.Begin);
+                stream.Seek(0x78 + origin, SeekOrigin.Begin);
                 writer.Write(0x101);
-                
-                stream.Seek(0x80, SeekOrigin.Begin);
+
+                stream.Seek(0x80 + origin, SeekOrigin.Begin);
                 writer.Write(data);
 
                 int fileSize = (int)stream.Position;
-                stream.Seek(0x04, SeekOrigin.Begin);
+                stream.Seek(0x04 + origin, SeekOrigin.Begin);
                 writer.Write(Compression == CompressionAlgorithm.None ? fileSize : 0x80);
             }
         }
@@ -313,11 +288,10 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(Bitmap != null);
-            Contract.Invariant(Filename != null);
-            Contract.Invariant(Filename.Length == 32);
-            Contract.Invariant(Versions.ContainsKey(Version));
-            Contract.Invariant(Compression == CompressionAlgorithm.None ? Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.UncompressedOnly : Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.CompressedOnly);
+            Contract.Invariant(!Loaded || Bitmap != null);
+            Contract.Invariant(!Loaded || Filename != null);
+            Contract.Invariant(!Loaded || Filename.Length == 32);
+            Contract.Invariant(!Loaded || Versions.ContainsKey(Version));
         }
     }
 }

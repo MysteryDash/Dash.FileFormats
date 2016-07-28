@@ -5,26 +5,19 @@
 //
 
 using System.Diagnostics.Contracts;
+using System.Text;
+using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
 {
-    public class UnknownSection : Section
+    public abstract class Section
     {
-        public byte[] Data { get; set; }
-        public int Count { get; set; }
-
-        public UnknownSection(byte[] nameBytes, byte[] data, int count)
-        {
-            NameBytes = nameBytes;
-            Data = data;
-            Count = count;
-        }
-
+        public MixedString Name { get; set; } = "";
+        
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(Data != null);
-            Contract.Invariant(Count >= 0);
+            Contract.Invariant(((byte[])Name).Length <= 0x20);
         }
     }
 }

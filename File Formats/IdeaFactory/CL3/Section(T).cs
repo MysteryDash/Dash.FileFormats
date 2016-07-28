@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
 {
@@ -13,9 +14,9 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
     {
         public List<T> Entries { get; set; }
 
-        public Section(byte[] nameBytes, List<T> entries)
+        public Section(MixedString name, List<T> entries)
         {
-            NameBytes = nameBytes;
+            Name = name;
             Entries = entries;
         }
 

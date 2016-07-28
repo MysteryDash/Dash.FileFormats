@@ -4,23 +4,23 @@
 // Written originally by Alexandre Quoniou in 2016.
 //
 
+using System;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Text;
+using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
 {
     public class FileEntry : IEntry
     {
-        public byte[] NameBytes { get; set; }
-        public string Name => Encoding.UTF8.GetString(NameBytes.TakeWhile(b => b != '\0').ToArray());
+        public MixedString Name { get; set; }
         public byte[] File { get; set; }
         public int LinkStartIndex { get; set; }
         public int LinkCount { get; set; }
-
-        public FileEntry(byte[] name, byte[] file, int linkStartIndex, int linkCount)
+        
+        public FileEntry(MixedString name, byte[] file, int linkStartIndex, int linkCount)
         {
-            NameBytes = name;
+            Name = name;
             File = file;
             LinkStartIndex = linkStartIndex;
             LinkCount = linkCount;
@@ -29,8 +29,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(NameBytes != null);
-            Contract.Invariant(NameBytes.Length == 0x200);
+            Contract.Invariant(((byte[])Name).Length <= 0x20);
             Contract.Invariant(File != null);
             Contract.Invariant(LinkStartIndex >= 0);
             Contract.Invariant(LinkCount >= 0);

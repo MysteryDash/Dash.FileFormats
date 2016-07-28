@@ -7,7 +7,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MysteryDash.FileFormats.Exceptions
+namespace MysteryDash.FileFormats
 {
     [Serializable]
     public class InvalidVersionException : Exception

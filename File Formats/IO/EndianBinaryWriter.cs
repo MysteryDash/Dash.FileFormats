@@ -55,6 +55,9 @@ namespace MysteryDash.FileFormats.IO
 
         public void Dispose()
         {
+            Contract.Assume(_littleEndianWriter != null);
+            Contract.Assume(_bigEndianWriter != null);
+
             if (!_disposed)
             {
                 _littleEndianWriter.Dispose();
