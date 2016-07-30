@@ -22,7 +22,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         public bool Loaded { get; private set; }
         public bool IsLittleEndian { get; set; }
         public ContentType ContentType { get; set; }
-        public List<Section> Sections { get; set; }
+        public List<Section> Sections { get; private set; }
 
         public Cl3()
         {
@@ -200,15 +200,15 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             Contract.Requires<ArgumentException>(stream.CanWrite);
             Contract.Requires<ArgumentException>(stream.CanSeek);
             Contract.Requires<DivideByZeroException>(customOffsetAlignment > 0);
-            Contract.Requires(Sections.Count(section => ((string)section?.Name).StartsWith("FILE_COLLECTION")) == 1, "You must have one and only one FILE_COLLECTION section.");
-            Contract.Requires(Sections.Count(section => ((string)section?.Name).StartsWith("FILE_LINK")) == 1, "You must have one and only one FILE_LINK section.");
+            Contract.Requires(Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION") == 1, "You must have one and only one FILE_COLLECTION section.");
+            Contract.Requires(Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_LINK") == 1, "You must have one and only one FILE_LINK section.");
 
             var origin = stream.Position;
 
             using (var writer = new EndianBinaryWriter(stream, new UTF8Encoding(false, true), true, IsLittleEndian))
             {
                 int headerSize = 0x18;
-                int startSectionsOffset = ((headerSize + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment;
+                int startSectionsOffset = AlignOffset(headerSize, customOffsetAlignment);
                 int endSectionsOffset = startSectionsOffset + Sections.Count * 0x50;
 
                 writer.Write(Magic);
@@ -228,14 +228,14 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                     {
                         var fileCollection = (Section<FileEntry>)Sections[i];
                         var fileEntries = fileCollection.Entries;
-                        int startFileEntriesOffset = ((endSectionsOffset + totalDataWritten + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment;
+                        int startFileEntriesOffset = AlignOffset(endSectionsOffset + totalDataWritten, customOffsetAlignment);
                         int fileEntriesLength = fileEntries.Count * 0x230;
                         int endFileEntriesOffset = startFileEntriesOffset + fileEntriesLength;
 
                         int baseDataWritten = totalDataWritten;
                         for (int j = 0; j < fileEntries.Count; j++)
                         {
-                            int fileOffset = ((endFileEntriesOffset + totalDataWritten + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment;
+                            int fileOffset = AlignOffset(endFileEntriesOffset + totalDataWritten, customOffsetAlignment);
                             totalDataWritten += fileEntries[j].File.Length;
 
                             stream.Seek(startFileEntriesOffset + 0x230 * j + origin, SeekOrigin.Begin);
@@ -263,7 +263,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                     {
                         var fileLinks = (Section<FileLink>)Sections[i];
                         var linkEntries = fileLinks.Entries;
-                        int startLinkEntriesOffset = ((endSectionsOffset + totalDataWritten + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment;
+                        int startLinkEntriesOffset = AlignOffset(endSectionsOffset + totalDataWritten, customOffsetAlignment);
 
                         stream.Seek(startSectionOffset + origin, SeekOrigin.Begin);
                         writer.Write(fileLinks.Name.GetCustomLength(0x20));
@@ -283,7 +283,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                     else if (Sections[i] is UnknownSection)
                     {
                         var section = (UnknownSection)Sections[i];
-                        int startDataOffset = ((endSectionsOffset + totalDataWritten + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment;
+                        int startDataOffset = AlignOffset(endSectionsOffset + totalDataWritten, customOffsetAlignment);
 
                         stream.Seek(startSectionOffset + origin, SeekOrigin.Begin);
                         writer.Write(section.Name.GetCustomLength(0x20));
@@ -297,13 +297,13 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                         totalDataWritten += section.Data.Length;
                     }
 
-                    totalDataWritten = ((totalDataWritten + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment; // Realign total data written with offset alignment
+                    totalDataWritten = AlignOffset(totalDataWritten, customOffsetAlignment); // Realign total data written with offset alignment
                 }
 
                 // Align file size
                 if (stream.Length % customOffsetAlignment != 0)
                 {
-                    stream.Seek(((stream.Length + customOffsetAlignment - 1) / customOffsetAlignment) * customOffsetAlignment - 1 + origin, SeekOrigin.Begin);
+                    stream.Seek(AlignOffset((int)stream.Length, customOffsetAlignment) - 1 + origin, SeekOrigin.Begin);
                     stream.WriteByte(0x00);
                 }
             }
@@ -313,7 +313,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         {
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
 
-            var files = (Section<FileEntry>)Sections.FirstOrDefault(section => ((string) section?.Name).StartsWith("FILE_COLLECTION"));
+            var files = (Section<FileEntry>)Sections.FirstOrDefault(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION");
             if (files == null)
             {
                 return;
@@ -326,10 +326,9 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             }
         }
 
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
+        private int AlignOffset(int offset, int alignment)
         {
-            Contract.Invariant(!Loaded || Sections != null);
+            return ((offset + alignment - 1) / alignment) * alignment;
         }
 
         public void Dispose()
