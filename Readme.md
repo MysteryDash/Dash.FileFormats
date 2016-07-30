@@ -37,7 +37,7 @@ The following people are contributors of this project :
 ## Versioning
 
 We use [Semantic Versioning 2.0.0](http://semver.org/) for versioning.  
-The current version of this project is the 2.1.2-alpha.
+The current version of this project is the 2.2.0-alpha.
 
 ## License
 

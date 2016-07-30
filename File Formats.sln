@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multi Extractor", "Multi Extractor\Multi Extractor.csproj", "{DCFF409E-4338-49D5-8D26-017E28977000}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tid Maker", "Tid Maker\Tid Maker.csproj", "{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{DCFF409E-4338-49D5-8D26-017E28977000}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCFF409E-4338-49D5-8D26-017E28977000}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCFF409E-4338-49D5-8D26-017E28977000}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

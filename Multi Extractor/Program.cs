@@ -1,4 +1,10 @@
-﻿using System;
+﻿// 
+// This file is licensed under the terms of the Simple Non Code License (SNCL) 2.0.2.
+// The full license text can be found in the file named License.txt.
+// Written originally by Alexandre Quoniou in 2016.
+//
+
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using MysteryDash.FileFormats;
@@ -43,7 +49,7 @@ namespace MysteryDash.MultiExtractor
                             archive.WriteFolder(Path.ChangeExtension(arg, ""));
                             archive.Dispose();
                         }
-
+                        
                         var tid = file as Tid;
                         tid?.Bitmap.Save(Path.ChangeExtension(arg, "png"));
 
