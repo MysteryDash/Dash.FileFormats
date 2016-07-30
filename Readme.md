@@ -2,7 +2,7 @@
 
 This project has been made to open, read and/or create files from uncommon formats found within various games or software.
 
-## What we can do for now
+## What we can do for now with the library
 
 We cannot do much, but here's what's available.
 
@@ -11,11 +11,19 @@ Idea Factory's File Formats :
 * Read, extract and create .CL3
 * Convert .TID to common picture formats and common picture format back to .TID
 
+## Side-tools
+
+Since not everyone is able to create and compile C# projects from a library, I decided to make a few tools for these people :
+* Multi Extractor, a tool able to extract/convert .PAC, .CL3 and .TID
+* Tid Maker, a tool able to convert any .NET-readable picture format to an uncompressed .TID (version 0x90)
+
 ## What has yet to be done
 
 We still have a long way to go ! Here's what we need to do :
 * Add compression support for .PAC
 * Fix DXT1/5 compression for .TID which isn't working for an unknown reason
+* Make the .PAC builder side-tool
+* Make the .CL3 builder side-tool
 * Find an alternative to Neptoolia.Datalayer.Decompressor
 * Test everything
 
