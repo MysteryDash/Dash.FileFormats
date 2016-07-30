@@ -37,8 +37,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
         public bool Loaded { get; private set; }
         public Bitmap Bitmap { get; set; }
         public CompressionAlgorithm Compression { get; set; }
-        public byte[] Filename { get; set; }
-        public string ReadableFilename => Encoding.ASCII.GetString(Filename.TakeWhile(c => c != '\0').ToArray());
+        public MixedString Filename { get; set; }
         public int Height => Bitmap.Height;
         public bool IsLittleEndian => (Version & 0x01) == 0;
         public uint UncompressedSize => 0x80 + (uint) Width*(uint) Height*4;
@@ -50,18 +49,10 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
             
         }
 
-        public Tid(Bitmap bitmap, byte[] filename, CompressionAlgorithm compression = CompressionAlgorithm.None, byte version = 0x90)
+        public Tid(Bitmap bitmap, MixedString filename, CompressionAlgorithm compression = CompressionAlgorithm.None, byte version = 0x90)
         {
             Bitmap = bitmap;
-            if (filename.Length <= 32)
-            {
-                Filename = new byte[32];
-                filename.CopyTo(Filename, 0);
-            }
-            else
-            {
-                throw new ArgumentException($"{nameof(filename)} must not be longer than 32 characters.");
-            }
+            Filename = filename.GetCustomLength(0x20);
             Compression = compression;
             Version = version;
             Loaded = true;
@@ -218,7 +209,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
                 writer.Write(0x20);
 
                 stream.Seek(0x20 + origin, SeekOrigin.Begin);
-                writer.Write(Filename);
+                writer.Write(Filename.GetCustomLength(0x20));
                 writer.Write(0x60);
                 writer.Write(Width);
                 writer.Write(Height);
@@ -289,8 +280,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.TID
         private void ObjectInvariant()
         {
             Contract.Invariant(!Loaded || Bitmap != null);
-            Contract.Invariant(!Loaded || Filename != null);
-            Contract.Invariant(!Loaded || Filename.Length == 32);
+            Contract.Invariant(!Loaded || Filename.Length <= 0x20);
             Contract.Invariant(!Loaded || Versions.ContainsKey(Version));
         }
     }

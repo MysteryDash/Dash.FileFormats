@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Text;
 using MysteryDash.FileFormats.IdeaFactory.CL3;
 using MysteryDash.FileFormats.IdeaFactory.PAC;
 using MysteryDash.FileFormats.IdeaFactory.TID;
@@ -22,20 +23,14 @@ namespace MysteryDash.FileFormats
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
             Contract.Requires<FileNotFoundException>(File.Exists(path));
 
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return LoadFromStream(stream);
-            }
+            return LoadFromStream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read));
         }
 
         public static IFileFormat LoadBytes(byte[] data)
         {
             Contract.Requires<ArgumentNullException>(data != null);
 
-            using (var stream = new MemoryStream(data))
-            {
-                return LoadFromStream(stream);
-            }
+            return LoadFromStream(new MemoryStream(data));
         }
 
         public static IFileFormat LoadFromStream(Stream stream)
@@ -49,7 +44,7 @@ namespace MysteryDash.FileFormats
             {
                 return null;
             }
-            
+
             var file = (IFileFormat)Activator.CreateInstance(type);
             file.LoadFromStream(stream);
             return file;
@@ -63,7 +58,7 @@ namespace MysteryDash.FileFormats
 
             var startingOffset = stream.Position;
 
-            using (var reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
                 var header = new string(reader.ReadChars(8));
 

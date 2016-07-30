@@ -20,7 +20,6 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
         public bool CurrentlyCompressed { get; private set; }
         public bool ToCompress => false;
         public bool CacheFromStream { get; private set; }
-        public bool LeaveOpen { get; private set; }
 
         private byte[] _file;
         private Stream _fileStream;
@@ -60,10 +59,6 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                 {
                     _file = buffer;
                     CurrentlyCompressed = false;
-                    if (!LeaveOpen)
-                    {
-                        _fileStream.Close();
-                    }
                     _fileStream = null;
                 }
 
@@ -74,7 +69,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
         public void SetFile(bool compressed, int decompressedSize, byte[] file)
         {
             Contract.Requires(file != null);
-            Contract.Requires(!compressed || decompressedSize == file.Length, "decompressedSize and file.Length must be the same if the file isn't compressed.");
+            Contract.Requires(compressed || decompressedSize == file.Length, "decompressedSize and file.Length must be the same if the file isn't compressed.");
             Contract.Requires(decompressedSize >= 0);
 
             CurrentlyCompressed = compressed;
@@ -82,9 +77,9 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
             _file = file;
         }
 
-        public void SetFile(bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream, bool leaveOpen)
+        public void SetFile(bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream)
         {
-            Contract.Requires(!compressed || decompressedSize == fileSize, "decompressedSize and fileSize must be the same if the file isn\'t compressed.");
+            Contract.Requires(compressed || decompressedSize == fileSize, "decompressedSize and fileSize must be the same if the file isn\'t compressed.");
             Contract.Requires(decompressedSize >= 0);
             Contract.Requires(fileStream != null);
             Contract.Requires(fileOffset >= 0);
@@ -96,7 +91,6 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
             _fileOffset = fileOffset;
             _fileSize = fileSize;
             CacheFromStream = cacheFromStream;
-            LeaveOpen = leaveOpen;
         }
 
         public PacEntry(Pac archive, MixedString path, bool compressed, int decompressedSize, byte[] file)
@@ -108,29 +102,25 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
             SetFile(compressed, decompressedSize, file);
         }
 
-        public PacEntry(Pac archive, MixedString path, bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream, bool leaveOpen)
+        public PacEntry(Pac archive, MixedString path, bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream)
         {
             Contract.Requires<ArgumentNullException>(archive != null);
 
             Archive = archive;
             Path = path;
-            SetFile(compressed, decompressedSize, fileStream, fileOffset, fileSize, cacheFromStream, leaveOpen);
+            SetFile(compressed, decompressedSize, fileStream, fileOffset, fileSize, cacheFromStream);
         }
 
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(((byte[])Path).Length <= 0x104);
+            Contract.Invariant(Path.Length <= 0x104);
         }
 
         public void Dispose()
         {
             Path = string.Empty;
             _file = null;
-            if (!LeaveOpen)
-            {
-                _fileStream.Dispose();
-            }
             _fileStream = null;
         }
     }

@@ -4,9 +4,7 @@
 // Written originally by Alexandre Quoniou in 2016.
 //
 
-using System;
 using System.Diagnostics.Contracts;
-using System.Text;
 using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
@@ -29,7 +27,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(((byte[])Name).Length <= 0x20);
+            Contract.Invariant(Name.Length <= 0x200);
             Contract.Invariant(File != null);
             Contract.Invariant(LinkStartIndex >= 0);
             Contract.Invariant(LinkCount >= 0);

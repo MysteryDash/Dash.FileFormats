@@ -11,10 +11,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MysteryDash.FileFormats.IO;
+using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
 {
-    public class Cl3 : IFileFormat
+    public class Cl3 : IFileFormat, IArchive
     {
         private static readonly byte[] Magic = { 0x43, 0x4C, 0x33 };
 
@@ -93,12 +94,12 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
-            var name = reader.ReadBytes(0x20);
+            MixedString name = reader.ReadBytes(0x20);
             var count = reader.ReadInt32();
             var dataSize = reader.ReadInt32();
             var dataOffset = reader.ReadInt32();
 
-            string realName = Encoding.UTF8.GetString(name.TakeWhile(b => b != '\0').ToArray());
+            string realName = name.ZeroTerminatedString;
             if (realName == "FILE_COLLECTION")
             {
                 var fileEntries = new List<FileEntry>();
@@ -135,6 +136,40 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             return new UnknownSection(name, reader.ReadBytes(dataSize), count);
         }
 
+        public void LoadFolder(string path, bool ignoreFileOnInvalidPath = false)
+        {
+            path = path.TrimEnd('\\') + '\\';
+            var pathLength = path.Length;
+
+            var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories).ToArray();
+            var relativePaths = files.Select(file => Encoding.UTF8.GetBytes(file.Remove(0, pathLength))).ToArray();
+
+            var section = (Section<FileEntry>)Sections.FirstOrDefault(sec => ((string) sec?.Name).StartsWith("FILE_COLLECTION"));
+            if (section == null)
+            {
+                section = new Section<FileEntry>("FILE_COLLECTION", new List<FileEntry>());
+                Sections.Add(section);
+            }
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (relativePaths[i].Length > 0x104)
+                {
+                    if (ignoreFileOnInvalidPath)
+                        continue;
+                    throw new PathTooLongException();
+                }
+                
+                var file = File.ReadAllBytes(files[i]);
+                section.Entries.Add(new FileEntry(relativePaths[i], file, 0, 0));
+            }
+
+            if (Sections.FirstOrDefault(sec => ((string)sec?.Name).StartsWith("FILE_LINK")) == null)
+            {
+                Sections.Add(new Section<FileLink>("FILE_LINK", new List<FileLink>()));
+            }
+        }
+
         public void WriteFile(string path)
         {
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
@@ -165,8 +200,8 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             Contract.Requires<ArgumentException>(stream.CanWrite);
             Contract.Requires<ArgumentException>(stream.CanSeek);
             Contract.Requires<DivideByZeroException>(customOffsetAlignment > 0);
-            Contract.Requires(Sections.Count(section => section?.Name == "FILE_COLLECTION") == 1, "You must have one and only one FILE_COLLECTION section.");
-            Contract.Requires(Sections.Count(section => section?.Name == "FILE_LINK") == 1, "You must have one and only one FILE_LINK section.");
+            Contract.Requires(Sections.Count(section => ((string)section?.Name).StartsWith("FILE_COLLECTION")) == 1, "You must have one and only one FILE_COLLECTION section.");
+            Contract.Requires(Sections.Count(section => ((string)section?.Name).StartsWith("FILE_LINK")) == 1, "You must have one and only one FILE_LINK section.");
 
             var origin = stream.Position;
 
@@ -205,9 +240,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
 
                             stream.Seek(startFileEntriesOffset + 0x230 * j + origin, SeekOrigin.Begin);
                             
-
-
-                            writer.Write(fileEntries[j].Name.GetCustomLength(0x20));
+                            writer.Write(fileEntries[j].Name.GetCustomLength(0x200));
                             writer.Write(j);
                             writer.Write(fileOffset - startFileEntriesOffset);
                             writer.Write(fileEntries[j].File.Length);
@@ -276,10 +309,32 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             }
         }
 
+        public void WriteFolder(string path)
+        {
+            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+
+            var files = (Section<FileEntry>)Sections.FirstOrDefault(section => ((string) section?.Name).StartsWith("FILE_COLLECTION"));
+            if (files == null)
+            {
+                return;
+            }
+            foreach (var file in files.Entries)
+            {
+                var realPath = Path.Combine(path, file.Name.ZeroTerminatedString);
+                Directory.CreateDirectory(Path.GetDirectoryName(realPath));
+                File.WriteAllBytes(realPath, file.File);
+            }
+        }
+
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
             Contract.Invariant(!Loaded || Sections != null);
+        }
+
+        public void Dispose()
+        {
+            Sections = null;
         }
     }
 }

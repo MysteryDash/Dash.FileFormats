@@ -5,7 +5,6 @@
 //
 
 using System.Diagnostics.Contracts;
-using System.Text;
 using MysteryDash.FileFormats.Utils;
 
 namespace MysteryDash.FileFormats.IdeaFactory.CL3
@@ -17,7 +16,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
-            Contract.Invariant(((byte[])Name).Length <= 0x20);
+            Contract.Invariant(Name.Length <= 0x20);
         }
     }
 }

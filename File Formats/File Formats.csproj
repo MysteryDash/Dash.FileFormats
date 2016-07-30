@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compression\Decompression.cs" />
+    <Compile Include="IArchive.cs" />
     <Compile Include="IdeaFactory\CL3\Cl3.cs" />
     <Compile Include="IdeaFactory\CL3\ContentType.cs" />
     <Compile Include="IdeaFactory\CL3\FileEntry.cs" />

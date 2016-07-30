@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 
 namespace MysteryDash.FileFormats.Utils
 {
@@ -41,6 +42,8 @@ namespace MysteryDash.FileFormats.Utils
             return output;
         }
 
+        public string ZeroTerminatedString => new string(((string)this).TakeWhile(c => c != '\0').ToArray());
+
         public static implicit operator MixedString(string value) => new MixedString(value);
 
         public static implicit operator MixedString(byte[] value) => new MixedString(value);
@@ -48,5 +51,7 @@ namespace MysteryDash.FileFormats.Utils
         public static implicit operator string(MixedString value) => value._dataString ?? (value._dataString = value._encoding.GetString(value._dataBytes));
 
         public static implicit operator byte[] (MixedString value) => value._dataBytes ?? (value._dataBytes = value._encoding.GetBytes(value._dataString));
+
+        public int Length => ((byte[])this).Length;
     }
 }

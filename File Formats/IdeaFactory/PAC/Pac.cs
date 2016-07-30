@@ -19,57 +19,61 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
     /// <summary>
     /// Provides access to pac archives.
     /// </summary>
-    public class Pac : IFileFormat
+    public class Pac : IFileFormat, IArchive
     {
-        public List<PacEntry> Files { get; }
+        private List<Stream> _streams;
+
+        public List<PacEntry> Files { get; private set; }
         public bool Loaded => true;
+        public bool LeaveStreamsOpened = false;
 
         public Pac()
         {
+            _streams = new List<Stream>();
             Files = new List<PacEntry>();
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(Files != null);
         }
 
         public void LoadFile(string path)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
             Contract.Requires<FileNotFoundException>(File.Exists(path));
 
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                LoadFromStream(stream);
-            }
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            LoadFromStream(stream);
         }
 
         public void LoadBytes(byte[] data)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(data != null);
 
-            using (var stream = new MemoryStream(data))
-            {
-                LoadFromStream(stream);
-            }
+            var stream = new MemoryStream(data);
+            LoadFromStream(stream);
         }
 
         public void LoadFromStream(Stream stream)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
+            Contract.Requires<ArgumentNullException>(stream != null);
+            Contract.Requires(stream.CanRead);
+            Contract.Requires(stream.CanSeek);
+
             LoadFromStream(stream, false);
         }
 
         public void LoadFromStream(Stream stream, bool cacheFiles)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
             Contract.Requires(stream.CanRead);
             Contract.Requires(stream.CanSeek);
 
+            _streams.Add(stream);
+
             var origin = (int)stream.Position;
             
-            using (var reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
                 if (new string(reader.ReadChars(8)) != "DW_PACK\0")
                     throw new InvalidDataException("This isn't a PAC file.");
@@ -96,14 +100,24 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                     }
                     else
                     {
-                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, stream, dataOffset + relativedDataOffset + origin, size, false, true));
+                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, stream, dataOffset + relativedDataOffset + origin, size, false));
                     }
                 }
             }
         }
 
-        public void LoadFolder(string path, bool preloadFiles = false, bool ignoreFileOnInvalidPath = false)
+        public void LoadFolder(string path, bool ignoreFileOnInvalidPath = false)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
+
+            LoadFolder(path, ignoreFileOnInvalidPath, false);
+        }
+
+
+        public void LoadFolder(string path, bool ignoreFileOnInvalidPath, bool preloadFiles)
+        {
+            Contract.Requires<ObjectDisposedException>(Files != null);
+
             path = path.TrimEnd('\\') + '\\';
             var pathLength = path.Length;
 
@@ -127,13 +141,14 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                 else
                 {
                     var fileStream = File.OpenRead(files[i]);
-                    Files.Add(new PacEntry(this, relativePaths[i], false, (int)fileStream.Length, fileStream, 0, (int)fileStream.Length, true, false));
+                    Files.Add(new PacEntry(this, relativePaths[i], false, (int)fileStream.Length, fileStream, 0, (int)fileStream.Length, true));
                 }
             }
         }
 
         public void WriteFile(string path)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
@@ -144,6 +159,8 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
 
         public byte[] WriteBytes()
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
+
             using (var stream = new MemoryStream())
             {
                 WriteToStream(stream);
@@ -153,6 +170,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
 
         public void WriteToStream(Stream stream)
         {
+            Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
             Contract.Requires(stream.CanWrite);
             Contract.Requires(stream.CanSeek);
@@ -189,14 +207,31 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
 
         public void WriteFolder(string path)
         {
-            Contract.Requires<ArgumentNullException>(string.IsNullOrWhiteSpace(path));
+            Contract.Requires<ObjectDisposedException>(Files != null);
+            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
 
             foreach (var file in Files)
             {
-                var realPath = Path.Combine(path, new string(((string)file.Path).TakeWhile(b => b != '\0').ToArray()));
+                var realPath = Path.Combine(path, file.Path.ZeroTerminatedString);
                 Directory.CreateDirectory(Path.GetDirectoryName(realPath));
                 File.WriteAllBytes(realPath, file.File);
             }
+        }
+
+        public void Dispose()
+        {
+            if (_streams == null)
+            {
+                throw new ObjectDisposedException(nameof(Pac));
+            }
+
+            if (!LeaveStreamsOpened)
+            {
+                _streams.ForEach(stream => stream.Close());
+            }
+
+            _streams = null;
+            Files = null;
         }
     }
 }
