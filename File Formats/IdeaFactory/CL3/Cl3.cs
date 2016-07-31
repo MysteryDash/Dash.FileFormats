@@ -164,7 +164,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                 section.Entries.Add(new FileEntry(relativePaths[i], file, 0, 0));
             }
 
-            if (Sections.FirstOrDefault(sec => ((string)sec?.Name).StartsWith("FILE_LINK")) == null)
+            if (Sections.FirstOrDefault(sec => sec?.Name.ZeroTerminatedString == "FILE_LINK") == null)
             {
                 Sections.Add(new Section<FileLink>("FILE_LINK", new List<FileLink>()));
             }

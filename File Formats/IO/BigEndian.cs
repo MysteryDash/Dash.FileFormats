@@ -48,32 +48,39 @@ namespace MysteryDash.FileFormats.IO
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt16(byte* p, short s)
         {
-            p[0] = (byte)(s >> 8);
-            p[1] = (byte)s;
+            unchecked
+            {
+                p[0] = (byte)(s >> 8);
+                p[1] = (byte)s;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt32(byte* p, int i)
         {
-            p[0] = (byte)(i >> 24);
-            p[1] = (byte)(i >> 16);
-            p[2] = (byte)(i >> 8);
-            p[3] = unchecked((byte)i);
-            // No real reason here for this except that it's throwing an overflow exception when the input number is 1728. 
-            // When tested in local, this didn't happen.
+            unchecked
+            {
+                p[0] = (byte)(i >> 24);
+                p[1] = (byte)(i >> 16);
+                p[2] = (byte)(i >> 8);
+                p[3] = (byte)i;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt64(byte* p, long l)
         {
-            p[0] = (byte)(l >> 56);
-            p[1] = (byte)(l >> 48);
-            p[2] = (byte)(l >> 40);
-            p[3] = (byte)(l >> 32);
-            p[4] = (byte)(l >> 24);
-            p[5] = (byte)(l >> 16);
-            p[6] = (byte)(l >> 8);
-            p[7] = (byte)l;
+            unchecked
+            {
+                p[0] = (byte)(l >> 56);
+                p[1] = (byte)(l >> 48);
+                p[2] = (byte)(l >> 40);
+                p[3] = (byte)(l >> 32);
+                p[4] = (byte)(l >> 24);
+                p[5] = (byte)(l >> 16);
+                p[6] = (byte)(l >> 8);
+                p[7] = (byte)l;
+            }
         }
 
         public static void WriteDecimal(byte* p, decimal d)
