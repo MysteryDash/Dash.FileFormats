@@ -58,7 +58,9 @@ namespace MysteryDash.FileFormats.IO
             p[0] = (byte)(i >> 24);
             p[1] = (byte)(i >> 16);
             p[2] = (byte)(i >> 8);
-            p[3] = (byte)i;
+            p[3] = unchecked((byte)i);
+            // No real reason here for this except that it's throwing an overflow exception when the input number is 1728. 
+            // When tested in local, this didn't happen.
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
