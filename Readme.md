@@ -2,6 +2,8 @@
 
 This project has been made to open, read, edit and/or create files from uncommon formats found within various games or software.
 
+## Do you like my project ? [Want to buy me a coffee ?](https://www.paypal.com/us/cgi-bin/websrc?cmd=_send-money&nav=1&email=mrpicsou00759@gmail.com)
+
 ## Getting started modding Megadimension Neptunia Victory II
 
 I'll give you the instructions for modding any texture or picture present within the game. It'll be the same for modding other things.  
