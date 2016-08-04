@@ -59,10 +59,10 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
             Contract.Requires(stream.CanRead);
             Contract.Requires(stream.CanSeek);
 
-            LoadFromStream(stream, false);
+            LoadFromStream(stream, false, true);
         }
 
-        public void LoadFromStream(Stream stream, bool cacheFiles)
+        public void LoadFromStream(Stream stream, bool cacheFiles, bool keepCompressed)
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
@@ -96,11 +96,11 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                     if (cacheFiles)
                     {
                         stream.Seek(dataOffset + relativedDataOffset + origin, SeekOrigin.Begin);
-                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, reader.ReadBytes(size)));
+                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, reader.ReadBytes(size), keepCompressed));
                     }
                     else
                     {
-                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, stream, dataOffset + relativedDataOffset + origin, size, false));
+                        Files.Add(new PacEntry(this, filePath, isCompressed, extractedSize, stream, dataOffset + relativedDataOffset + origin, size, false, keepCompressed));
                     }
                 }
             }
@@ -110,11 +110,11 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
 
-            LoadFolder(path, ignoreFileOnInvalidPath, false);
+            LoadFolder(path, ignoreFileOnInvalidPath, false, true);
         }
 
 
-        public void LoadFolder(string path, bool ignoreFileOnInvalidPath, bool preloadFiles)
+        public void LoadFolder(string path, bool ignoreFileOnInvalidPath, bool preloadFiles, bool keepCompresed)
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
 
@@ -136,12 +136,12 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                 if (preloadFiles)
                 {
                     var file = File.ReadAllBytes(files[i]);
-                    Files.Add(new PacEntry(this, relativePaths[i], false, file.Length, file));
+                    Files.Add(new PacEntry(this, relativePaths[i], false, file.Length, file, keepCompresed));
                 }
                 else
                 {
                     var fileStream = File.OpenRead(files[i]);
-                    Files.Add(new PacEntry(this, relativePaths[i], false, (int)fileStream.Length, fileStream, 0, (int)fileStream.Length, true));
+                    Files.Add(new PacEntry(this, relativePaths[i], false, (int)fileStream.Length, fileStream, 0, (int)fileStream.Length, true, keepCompresed));
                 }
             }
         }
@@ -193,8 +193,8 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                     writer.Write(Files[i].Path.GetCustomLength(0x104));
                     stream.Seek(0x04, SeekOrigin.Current);
                     writer.Write(Files[i].File.Length);
-                    writer.Write(Files[i].File.Length);
-                    writer.Write(0x00);
+                    writer.Write(Files[i].DecompressedSize);
+                    writer.Write(Files[i].KeepCompressed ? 0x01 : 0x00);
                     writer.Write(relativeDataOffset);
 
                     stream.Seek(dataOffset + relativeDataOffset + origin, SeekOrigin.Begin);
@@ -216,6 +216,11 @@ namespace MysteryDash.FileFormats.IdeaFactory.PAC
                 Directory.CreateDirectory(Path.GetDirectoryName(realPath));
                 File.WriteAllBytes(realPath, file.File);
             }
+        }
+
+        public bool RemoveFile(string path)
+        {
+            return Files.RemoveAll(entry => entry.Path.ZeroTerminatedString == path) > 0;
         }
 
         public void Dispose()

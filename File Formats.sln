@@ -11,13 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multi Extractor", "Multi Extractor\Multi Extractor.csproj", "{DCFF409E-4338-49D5-8D26-017E28977000}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multi Extractor", "Side Tools\Multi Extractor\Multi Extractor.csproj", "{DCFF409E-4338-49D5-8D26-017E28977000}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tid Maker", "Tid Maker\Tid Maker.csproj", "{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tid Maker", "Side Tools\Tid Maker\Tid Maker.csproj", "{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pac Builder", "PAC Builder\Pac Builder.csproj", "{E94E3337-9CF6-400B-AB6A-0C388B7D4137}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pac Editor", "Side Tools\Pac Editor\Pac Editor.csproj", "{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cl3 Builder", "Cl3 Builder\Cl3 Builder.csproj", "{D84B8621-8B8F-4A7D-B72B-FBC9B3A4CAC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cl3 Editor", "Side Tools\Cl3 Editor\Cl3 Editor.csproj", "{043FFF17-0EE7-48D6-B02F-7B004FCF8482}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Side Tools", "Side Tools", "{D7701CC2-250F-40F1-82FD-33941B41B20F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,16 +39,22 @@ Global
 		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E94E3337-9CF6-400B-AB6A-0C388B7D4137}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E94E3337-9CF6-400B-AB6A-0C388B7D4137}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E94E3337-9CF6-400B-AB6A-0C388B7D4137}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E94E3337-9CF6-400B-AB6A-0C388B7D4137}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D84B8621-8B8F-4A7D-B72B-FBC9B3A4CAC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D84B8621-8B8F-4A7D-B72B-FBC9B3A4CAC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D84B8621-8B8F-4A7D-B72B-FBC9B3A4CAC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D84B8621-8B8F-4A7D-B72B-FBC9B3A4CAC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{043FFF17-0EE7-48D6-B02F-7B004FCF8482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{043FFF17-0EE7-48D6-B02F-7B004FCF8482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{043FFF17-0EE7-48D6-B02F-7B004FCF8482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{043FFF17-0EE7-48D6-B02F-7B004FCF8482}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DCFF409E-4338-49D5-8D26-017E28977000} = {D7701CC2-250F-40F1-82FD-33941B41B20F}
+		{CEDE0609-F93F-41A7-BD1E-11D2A4E25E3C} = {D7701CC2-250F-40F1-82FD-33941B41B20F}
+		{E10E34C1-4CFA-4F20-8995-3C8BC0C35FA6} = {D7701CC2-250F-40F1-82FD-33941B41B20F}
+		{043FFF17-0EE7-48D6-B02F-7B004FCF8482} = {D7701CC2-250F-40F1-82FD-33941B41B20F}
 	EndGlobalSection
 EndGlobal

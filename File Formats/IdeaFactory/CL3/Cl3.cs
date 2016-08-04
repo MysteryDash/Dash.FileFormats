@@ -24,6 +24,9 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
         public ContentType ContentType { get; set; }
         public List<Section> Sections { get; private set; }
 
+        public Section<FileEntry> FileEntries => (Section<FileEntry>)Sections.FirstOrDefault(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION");
+        public Section<FileLink> FileLinks => (Section<FileLink>) Sections.FirstOrDefault(section => section.Name.ZeroTerminatedString == "FILE_LINK");
+
         public Cl3()
         {
             Sections = new List<Section>();
@@ -34,7 +37,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
             IsLittleEndian = isLittleEndian;
             ContentType = contentType;
             Sections = sections;
-
+            
             Loaded = true;
         }
 
@@ -224,7 +227,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                 {
                     int startSectionOffset = startSectionsOffset + i * 0x50;
 
-                    if (Sections[i].Name == "FILE_COLLECTION")
+                    if (Sections[i].Name.ZeroTerminatedString == "FILE_COLLECTION")
                     {
                         var fileCollection = (Section<FileEntry>)Sections[i];
                         var fileEntries = fileCollection.Entries;
@@ -259,7 +262,7 @@ namespace MysteryDash.FileFormats.IdeaFactory.CL3
                         writer.Write(totalDataWritten - baseDataWritten);
                         writer.Write(startFileEntriesOffset);
                     }
-                    else if (Sections[i].Name == "FILE_LINK")
+                    else if (Sections[i].Name.ZeroTerminatedString == "FILE_LINK")
                     {
                         var fileLinks = (Section<FileLink>)Sections[i];
                         var linkEntries = fileLinks.Entries;
