@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dash", "Dash\Dash.csproj", "{9ED2167F-5766-42C0-B79E-718AF13AFB43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02424EF4-13AA-464B-B63D-BBCEDB744459}"
+	ProjectSection(SolutionItems) = preProject
+		License.txt = License.txt
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9ED2167F-5766-42C0-B79E-718AF13AFB43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ED2167F-5766-42C0-B79E-718AF13AFB43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ED2167F-5766-42C0-B79E-718AF13AFB43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ED2167F-5766-42C0-B79E-718AF13AFB43}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9286FF9-1D44-4F2E-A5B8-E88E6B1C44E9}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0;CONTRACTS_FULL</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ManagedSquish" Version="2.0.0">
+      <NoWarn></NoWarn>
+    </PackageReference>
+    <PackageReference Include="ZKWeb.System.Drawing" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Neptoolia.DataLayer.Compression.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
