@@ -11,7 +11,10 @@ using System.Text;
 
 namespace Dash.FileFormats.VDF
 {
-    public static class VdfSerializer
+    /// <summary>
+    /// Provvides methods for converting between .NET types and VDF types.
+    /// </summary>
+    public static class VdfConvert
     {
         private static readonly char[] Whitespaces = { ' ', '\r', '\n', '\t' };
         private static readonly Dictionary<char, char> EscapeSequences = new Dictionary<char, char>()
@@ -22,7 +25,52 @@ namespace Dash.FileFormats.VDF
             { '\\', '\\' }
         };
 
-        public static dynamic Deserialize(string data)
+        /// <summary>
+        /// Serializes the specified object to a VDF string.
+        /// </summary>
+        /// <param name="values">The object to serialize.</param>
+        /// <returns>A VDF string representation of the object.</returns>
+        public static string Serialize(IDictionary<string, object> values)
+        {
+            return Serialize(values, 0);
+        }
+
+        /// <summary>
+        /// Serializes the specified object to a VDF string.
+        /// </summary>
+        /// <param name="values">The object to serialize.</param>
+        /// <param name="indentationLevel">The indentation level for the current values.</param>
+        /// <returns>A VDF string representation of the object.</returns>
+        public static string Serialize(IDictionary<string, object> values, int indentationLevel)
+        {
+            StringBuilder serializedVdf = new StringBuilder();
+            var indentation = new string('\t', indentationLevel);
+
+            foreach (var pair in values)
+            {
+                switch (pair.Value)
+                {
+                    case IDictionary<string, object> subValues:
+                        serializedVdf.AppendLine($"{indentation}\"{pair.Key}\"");
+                        serializedVdf.AppendLine($"{indentation}{{");
+                        serializedVdf.Append(Serialize(subValues, indentationLevel + 1));
+                        serializedVdf.AppendLine($"{indentation}}}");
+                        break;
+                    default:
+                        serializedVdf.AppendLine($"{indentation}\"{pair.Key}\"\t\"{pair.Value}\"");
+                        break;
+                }
+            }
+
+            return serializedVdf.ToString();
+        }
+
+        /// <summary>
+        /// Deserializes the VDF to a .NET <see cref="ExpandoObject"/>
+        /// </summary>
+        /// <param name="value">The VDF to deserialize.</param>
+        /// <returns>The deserialized <see cref="ExpandoObject"/> from the VDF string.</returns>
+        public static ExpandoObject Deserialize(string value)
         {
             IDictionary<string, object> keyValues = new ExpandoObject();
 
@@ -37,7 +85,7 @@ namespace Dash.FileFormats.VDF
             StringBuilder currentToken = null;
             bool currentTokenQuoted = false;
 
-            foreach (var c in data)
+            foreach (var c in value)
             {
                 var currentState = states.Peek();
                 var currentKeyValues = stack.Peek();
@@ -67,7 +115,7 @@ namespace Dash.FileFormats.VDF
                         }
                         else
                         {
-                            throw new UnexpectedCharacterException();
+                            throw new VdfException.VdfReaderException();
                         }
                         break;
                     case DeserializationStates.ReadSinglelineComment:
@@ -119,7 +167,7 @@ namespace Dash.FileFormats.VDF
                         }
                         else
                         {
-                            throw new UnexpectedCharacterException();
+                            throw new VdfException.VdfReaderException();
                         }
                         break;
                     case DeserializationStates.ExpectValue:
@@ -152,17 +200,17 @@ namespace Dash.FileFormats.VDF
                         }
                         else
                         {
-                            throw new UnexpectedCharacterException();
+                            throw new VdfException.VdfReaderException();
                         }
                         break;
                     case DeserializationStates.ReadKey when (currentTokenQuoted && c == '"') || (!currentTokenQuoted && Whitespaces.Contains(c)):
-                        currentKey = currentToken.ToString();
+                        currentKey = currentToken?.ToString();
                         states.Pop();
                         states.Push(DeserializationStates.ExpectValue);
                         states.Push(DeserializationStates.IgnoreWhitespaces);
                         break;
                     case DeserializationStates.ReadValue when currentTokenQuoted && c == '"' || (!currentTokenQuoted && Whitespaces.Contains(c)):
-                        currentKeyValues.Add(currentKey, currentToken.ToString());
+                        currentKeyValues.Add(currentKey, currentToken?.ToString());
                         states.Pop();
                         states.Push(DeserializationStates.ExpectKey);
                         states.Push(DeserializationStates.IgnoreWhitespaces);
@@ -173,23 +221,23 @@ namespace Dash.FileFormats.VDF
                         break;
                     case DeserializationStates.ReadKey:
                     case DeserializationStates.ReadValue:
-                        currentToken.Append(c);
+                        currentToken?.Append(c);
                         break;
                     case DeserializationStates.ExpectEscapeSequence:
                         if (EscapeSequences.ContainsKey(c))
                         {
-                            currentToken.Append(EscapeSequences[c]);
+                            currentToken?.Append(EscapeSequences[c]);
                             states.Pop();
                         }
                         else
                         {
-                            throw new UnexpectedCharacterException();
+                            throw new VdfException.VdfReaderException();
                         }
                         break;
                 }
             }
 
-            return keyValues;
+            return (ExpandoObject)keyValues;
         }
 
         private enum DeserializationStates
