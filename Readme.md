@@ -1,3 +1,5 @@
+# The version number is suspended while Dash.FileFormats.VDF is being merged with MysteryDash.FileFormats.
+
 # File Formats
 
 This project has been made to open, read, edit and/or create files from uncommon formats found within various games or software.
