@@ -6,13 +6,16 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0;CONTRACTS_FULL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CONTRACTS_FULL</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;CONTRACTS_FULL</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ManagedSquish" Version="2.0.0">
-      <NoWarn></NoWarn>
-    </PackageReference>
+    <PackageReference Include="ManagedSquish" Version="2.0.0" />
     <PackageReference Include="ZKWeb.System.Drawing" Version="4.0.0" />
   </ItemGroup>
 
