@@ -88,9 +88,9 @@ namespace Dash.FileFormats.IdeaFactory.TID
         public void LoadFromStream(Stream stream)
         {
             Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires(stream.CanRead);
-            Contract.Requires(stream.CanSeek);
-            Contract.Requires(stream.Length >= 0x80); // Header Size, Minimum Required
+            Contract.Requires<ArgumentException>(stream.CanRead);
+            Contract.Requires<ArgumentException>(stream.CanSeek);
+            Contract.Requires<ArgumentException>(stream.Length >= 0x80); // Header Size, Minimum Required
 
             var origin = stream.Position;
 
@@ -194,7 +194,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         public void WriteToStream(Stream stream)
         {
-            Contract.Requires(Loaded);
+            Contract.Requires<Exception>(Loaded);
             Contract.Requires<ArgumentNullException>(stream != null);
             Contract.Requires<ArgumentException>(stream.CanWrite);
             Contract.Requires<ArgumentException>(stream.CanSeek);

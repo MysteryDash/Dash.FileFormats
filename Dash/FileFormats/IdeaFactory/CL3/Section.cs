@@ -4,19 +4,23 @@
 // Written originally by Alexandre Quoniou in 2016.
 //
 
-using System.Diagnostics.Contracts;
+using System;
 using Dash.Helpers;
 
 namespace Dash.FileFormats.IdeaFactory.CL3
 {
     public abstract class Section
     {
-        public MixedString Name { get; set; } = "";
-        
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
+        private MixedString _name = "";
+
+        public MixedString Name
         {
-            Contract.Invariant(Name.Length <= 0x20);
+            get => _name;
+            set
+            {
+                if (value.Length > 0x20) throw new ArgumentException($"{nameof(value.Length)} of {nameof(value)} must be equal or lower than 32 characters.");
+                _name = value;
+            }
         }
     }
 }

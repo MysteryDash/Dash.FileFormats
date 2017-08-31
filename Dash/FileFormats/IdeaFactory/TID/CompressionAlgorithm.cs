@@ -19,11 +19,15 @@ namespace Dash.FileFormats.IdeaFactory.TID
     {
         public static SquishFlags ToSquishFlags(this CompressionAlgorithm compression)
         {
-            if (compression == CompressionAlgorithm.Dxt1)
-                return SquishFlags.Dxt1;
-            if (compression == CompressionAlgorithm.Dxt5)
-                return SquishFlags.Dxt5;
-            return 0;
+            switch (compression)
+            {
+                case CompressionAlgorithm.Dxt1:
+                    return SquishFlags.Dxt1;
+                case CompressionAlgorithm.Dxt5:
+                    return SquishFlags.Dxt5;
+                default:
+                    return 0;
+            }
         }
     }
 }

@@ -4,33 +4,60 @@
 // Written originally by Alexandre Quoniou in 2016.
 //
 
-using System.Diagnostics.Contracts;
+using System;
 using Dash.Helpers;
 
 namespace Dash.FileFormats.IdeaFactory.CL3
 {
     public class FileEntry : IEntry
     {
-        public MixedString Name { get; set; }
-        public byte[] File { get; set; }
-        public int LinkStartIndex { get; set; }
-        public int LinkCount { get; set; }
-        
+        private MixedString _name;
+        private byte[] _file;
+        private int _linkStartIndex;
+        private int _linkCount;
+
+        public MixedString Name
+        {
+            get => _name;
+            set
+            {
+                if (value.Length > 0x200) throw new ArgumentException($"{nameof(value.Length)} of {nameof(value)} must be equal or lower than 512 characters.");
+                _name = value;
+            }
+        }
+
+        public byte[] File
+        {
+            get => _file;
+            set => _file = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public int LinkStartIndex
+        {
+            get => _linkStartIndex;
+            set
+            {
+                if (value < 0) throw new ArgumentException($"{nameof(value)} must be a positive integer.");
+                _linkStartIndex = value;
+            }
+        }
+
+        public int LinkCount
+        {
+            get => _linkCount;
+            set
+            {
+                if (value < 0) throw new ArgumentException($"{nameof(value)} must be a positive integer.");
+                _linkCount = value;
+            }
+        }
+
         public FileEntry(MixedString name, byte[] file, int linkStartIndex, int linkCount)
         {
             Name = name;
             File = file;
             LinkStartIndex = linkStartIndex;
             LinkCount = linkCount;
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(Name.Length <= 0x200);
-            Contract.Invariant(File != null);
-            Contract.Invariant(LinkStartIndex >= 0);
-            Contract.Invariant(LinkCount >= 0);
         }
     }
 }

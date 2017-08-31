@@ -43,7 +43,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void LoadFile(string path)
         {
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            Contract.Requires<ArgumentNullException>(path != null);
             Contract.Requires<FileNotFoundException>(File.Exists(path));
 
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -65,9 +65,9 @@ namespace Dash.FileFormats.IdeaFactory.CL3
         public void LoadFromStream(Stream stream)
         {
             Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires(stream.CanRead);
-            Contract.Requires(stream.CanSeek);
-            Contract.Requires(stream.Length - stream.Position >= 0x18); // Header Size, Minimum Required
+            Contract.Requires<ArgumentException>(stream.CanRead);
+            Contract.Requires<ArgumentException>(stream.CanSeek);
+            Contract.Requires<ArgumentException>(stream.Length - stream.Position >= 0x18); // Header Size, Minimum Required
 
             using (var reader = new EndianBinaryReader(stream))
             {
@@ -314,7 +314,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void WriteFolder(string path)
         {
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            Contract.Requires<ArgumentNullException>(path != null);
 
             var files = (Section<FileEntry>)Sections.FirstOrDefault(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION");
             if (files == null)
@@ -332,11 +332,6 @@ namespace Dash.FileFormats.IdeaFactory.CL3
         private int AlignOffset(int offset, int alignment)
         {
             return ((offset + alignment - 1) / alignment) * alignment;
-        }
-
-        public void Dispose()
-        {
-            Sections = null;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
     /// <summary>
     /// Provides access to pac archives.
     /// </summary>
-    public class Pac
+    public class Pac : IDisposable
     {
         private List<Stream> _streams;
 
@@ -36,7 +36,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         public void LoadFile(string path)
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            Contract.Requires<ArgumentNullException>(path != null);
             Contract.Requires<FileNotFoundException>(File.Exists(path));
 
             var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -56,8 +56,8 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires(stream.CanRead);
-            Contract.Requires(stream.CanSeek);
+            Contract.Requires<ArgumentException>(stream.CanRead);
+            Contract.Requires<ArgumentException>(stream.CanSeek);
 
             LoadFromStream(stream, false, true);
         }
@@ -66,8 +66,8 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires(stream.CanRead);
-            Contract.Requires(stream.CanSeek);
+            Contract.Requires<ArgumentException>(stream.CanRead);
+            Contract.Requires<ArgumentException>(stream.CanSeek);
 
             _streams.Add(stream);
 
@@ -149,7 +149,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         public void WriteFile(string path)
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            Contract.Requires<ArgumentNullException>(path != null);
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             {
@@ -172,8 +172,8 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         {
             Contract.Requires<ObjectDisposedException>(Files != null);
             Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires(stream.CanWrite);
-            Contract.Requires(stream.CanSeek);
+            Contract.Requires<ArgumentException>(stream.CanWrite);
+            Contract.Requires<ArgumentException>(stream.CanSeek);
 
             var origin = stream.Position;
 

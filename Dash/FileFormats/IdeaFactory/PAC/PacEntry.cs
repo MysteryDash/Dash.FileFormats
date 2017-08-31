@@ -15,7 +15,17 @@ namespace Dash.FileFormats.IdeaFactory.PAC
     public class PacEntry : IDisposable
     {
         public Pac Archive { get; }
-        public MixedString Path { get; set; }
+
+        public MixedString Path
+        {
+            get => _path;
+            set
+            {
+                if (value.Length > 0x104) throw new ArgumentException($"{nameof(value.Length)} of {nameof(value)} must be equal or lower than 260 characters.");
+                _path = value;
+            }
+        }
+
         public int DecompressedSize { get; private set; }
         public bool CurrentlyCompressed { get; private set; }
         public bool KeepCompressed { get; set; }
@@ -25,6 +35,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         private Stream _fileStream;
         private int _fileOffset;
         private int _fileSize;
+        private MixedString _path;
 
         public byte[] File
         {
@@ -42,6 +53,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
                     return _file;
                 }
 
+                if (_fileStream == null) throw new ObjectDisposedException(nameof(PacEntry));                
                 _fileStream.Seek(_fileOffset, SeekOrigin.Begin);
 
                 byte[] buffer = new byte[_fileSize];
@@ -68,9 +80,9 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         
         public void SetFile(bool compressed, int decompressedSize, byte[] file, bool keepCompressed)
         {
-            Contract.Requires(file != null);
-            Contract.Requires(compressed || decompressedSize == file.Length, "decompressedSize and file.Length must be the same if the file isn't compressed.");
-            Contract.Requires(decompressedSize >= 0);
+            Contract.Requires<ArgumentNullException>(file != null);
+            Contract.Requires<ArgumentException>(compressed || decompressedSize == file.Length, $"{nameof(decompressedSize)} and {nameof(file.Length)} must be the same if the file isn't compressed.");
+            Contract.Requires<ArgumentException>(decompressedSize >= 0);
 
             CurrentlyCompressed = compressed;
             DecompressedSize = decompressedSize;
@@ -80,11 +92,11 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void SetFile(bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream, bool keepCompressed)
         {
-            Contract.Requires(compressed || decompressedSize == fileSize, "decompressedSize and fileSize must be the same if the file isn\'t compressed.");
-            Contract.Requires(decompressedSize >= 0);
-            Contract.Requires(fileStream != null);
-            Contract.Requires(fileOffset >= 0);
-            Contract.Requires(fileSize >= 0);
+            Contract.Requires<ArgumentException>(compressed || decompressedSize == fileSize, $"{nameof(decompressedSize)} and {nameof(fileSize)} must be the same if the file isn\'t compressed.");
+            Contract.Requires<ArgumentException>(decompressedSize >= 0);
+            Contract.Requires<ArgumentNullException>(fileStream != null);
+            Contract.Requires<ArgumentException>(fileOffset >= 0);
+            Contract.Requires<ArgumentException>(fileSize >= 0);
 
             CurrentlyCompressed = compressed;
             DecompressedSize = decompressedSize;
@@ -113,16 +125,9 @@ namespace Dash.FileFormats.IdeaFactory.PAC
             SetFile(compressed, decompressedSize, fileStream, fileOffset, fileSize, cacheFromStream, keepCompressed);
         }
 
-        [ContractInvariantMethod]
-        private void ObjectInvariant()
-        {
-            Contract.Invariant(Path.Length <= 0x104);
-        }
-
         public void Dispose()
         {
-            Path = string.Empty;
-            _file = null;
+            _fileStream.Dispose();
             _fileStream = null;
         }
     }

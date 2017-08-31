@@ -24,8 +24,8 @@ namespace Dash.IO
 
         public bool IsLittleEndian
         {
-            get { return _writer == _littleEndianWriter; }
-            set { _writer = value ? _littleEndianWriter : _bigEndianWriter; }
+            get => _writer == _littleEndianWriter;
+            set => _writer = value ? _littleEndianWriter : _bigEndianWriter;
         }
 
         public EndianBinaryWriter(Stream input) : this(input, new UTF8Encoding(false, true), false, true)
