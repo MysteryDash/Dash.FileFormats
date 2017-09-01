@@ -37,7 +37,7 @@ namespace Dash.Helpers
             if (raw == null) throw new ArgumentNullException(nameof(raw));
             if (index < 0 || index > 3) throw new ArgumentOutOfRangeException(nameof(index));
 
-            for (int i = 0; i < index; i += 4)
+            for (int i = index; i < raw.Length; i += 4)
             {
                 raw[i] = value;
             }
