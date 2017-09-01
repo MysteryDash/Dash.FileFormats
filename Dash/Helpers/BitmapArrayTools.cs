@@ -13,12 +13,12 @@ namespace Dash.Helpers
     {
         public static byte[] Swap32BppColorChannels(byte[] raw, int first, int second, int third, int fourth)
         {
-            Contract.Requires<ArgumentNullException>(raw != null);
-            Contract.Requires<ArgumentException>(raw.Length % 4 == 0);
-            Contract.Requires<ArgumentOutOfRangeException>(first >= 0 || first <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(second >= 0 || second <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(third >= 0 || third <= 3);
-            Contract.Requires<ArgumentOutOfRangeException>(fourth >= 0 || fourth <= 3);
+            if (raw == null) throw new ArgumentNullException(nameof(raw));
+            if (raw.Length % 4 != 0) throw new ArgumentException(nameof(raw.Length));
+            if (first < 0 || first > 3) throw new ArgumentOutOfRangeException(nameof(first));
+            if (second < 0 || second > 3) throw new ArgumentOutOfRangeException(nameof(first));
+            if (third < 0 || third > 3) throw new ArgumentOutOfRangeException(nameof(first));
+            if (fourth < 0 || fourth > 3) throw new ArgumentOutOfRangeException(nameof(first));
 
             var length = raw.Length;
             var output = new byte[length];
@@ -35,13 +35,14 @@ namespace Dash.Helpers
 
         public static byte[] Fill32BppAlpha(byte[] raw, int index, byte value)
         {
-            Contract.Requires<ArgumentNullException>(raw != null);
-            Contract.Requires<ArgumentOutOfRangeException>(index >= 0 && index <= 3);
+            if (raw == null) throw new ArgumentNullException(nameof(raw));
+            if (index < 0 || index > 3) throw new ArgumentOutOfRangeException(nameof(index));
 
             for (int i = 0; i < index; i += 4)
             {
                 raw[i] = value;
             }
+
             return raw;
         }
     }

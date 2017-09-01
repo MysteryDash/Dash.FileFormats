@@ -42,9 +42,9 @@ namespace Dash.IO
 
         public EndianBinaryWriter(Stream input, Encoding encoding, bool leaveOpen, bool isLittleEndian)
         {
-            Contract.Requires<ArgumentNullException>(input != null);
-            Contract.Requires<ArgumentException>(input.CanSeek);
-            Contract.Requires<ArgumentNullException>(encoding != null);
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            if (!input.CanWrite) throw new ArgumentException(nameof(input));
+            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
 
             BaseStream = input;
             _littleEndianWriter = new BinaryWriter(input, encoding, leaveOpen);
@@ -55,9 +55,6 @@ namespace Dash.IO
 
         public void Dispose()
         {
-            Contract.Assume(_littleEndianWriter != null);
-            Contract.Assume(_bigEndianWriter != null);
-
             if (!_disposed)
             {
                 _littleEndianWriter.Dispose();

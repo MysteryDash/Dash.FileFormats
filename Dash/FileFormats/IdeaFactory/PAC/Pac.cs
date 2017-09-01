@@ -35,39 +35,26 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void LoadFile(string path)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(path != null);
-            Contract.Requires<FileNotFoundException>(File.Exists(path));
-
             var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             LoadFromStream(stream);
         }
 
         public void LoadBytes(byte[] data)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(data != null);
-
             var stream = new MemoryStream(data);
             LoadFromStream(stream);
         }
 
         public void LoadFromStream(Stream stream)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanRead);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
-
             LoadFromStream(stream, false, true);
         }
 
         public void LoadFromStream(Stream stream, bool cacheFiles, bool keepCompressed)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanRead);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
+            if (Files == null) throw new ObjectDisposedException(nameof(Files));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead || !stream.CanSeek) throw new ArgumentException(nameof(ArgumentException));
 
             _streams.Add(stream);
 
@@ -108,15 +95,13 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void LoadFolder(string path, bool ignoreFileOnInvalidPath = false)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-
             LoadFolder(path, ignoreFileOnInvalidPath, false, true);
         }
 
 
         public void LoadFolder(string path, bool ignoreFileOnInvalidPath, bool preloadFiles, bool keepCompresed)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
+            if (Files == null) throw new ObjectDisposedException(nameof(Files));
 
             path = path.TrimEnd('\\') + '\\';
             var pathLength = path.Length;
@@ -148,9 +133,6 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void WriteFile(string path)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(path != null);
-
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             {
                 WriteToStream(stream);
@@ -159,8 +141,6 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public byte[] WriteBytes()
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-
             using (var stream = new MemoryStream())
             {
                 WriteToStream(stream);
@@ -170,10 +150,9 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void WriteToStream(Stream stream)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanWrite);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
+            if (Files == null) throw new ObjectDisposedException(nameof(Files));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanWrite || !stream.CanSeek) throw new ArgumentException(nameof(ArgumentException));
 
             var origin = stream.Position;
 
@@ -207,8 +186,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void WriteFolder(string path)
         {
-            Contract.Requires<ObjectDisposedException>(Files != null);
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            if (Files == null) throw new ObjectDisposedException(nameof(Files));
 
             foreach (var file in Files)
             {

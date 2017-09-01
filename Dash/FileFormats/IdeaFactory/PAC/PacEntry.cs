@@ -80,9 +80,9 @@ namespace Dash.FileFormats.IdeaFactory.PAC
         
         public void SetFile(bool compressed, int decompressedSize, byte[] file, bool keepCompressed)
         {
-            Contract.Requires<ArgumentNullException>(file != null);
-            Contract.Requires<ArgumentException>(compressed || decompressedSize == file.Length, $"{nameof(decompressedSize)} and {nameof(file.Length)} must be the same if the file isn't compressed.");
-            Contract.Requires<ArgumentException>(decompressedSize >= 0);
+            if (file == null) throw new ArgumentNullException(nameof(file));
+            if (!compressed && decompressedSize != file.Length) throw new ArgumentException($"{nameof(decompressedSize)} and {nameof(file.Length)} must be the same if the file isn't compressed.");
+            if (decompressedSize < 0) throw new ArgumentException(nameof(decompressedSize));
 
             CurrentlyCompressed = compressed;
             DecompressedSize = decompressedSize;
@@ -92,11 +92,11 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public void SetFile(bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream, bool keepCompressed)
         {
-            Contract.Requires<ArgumentException>(compressed || decompressedSize == fileSize, $"{nameof(decompressedSize)} and {nameof(fileSize)} must be the same if the file isn\'t compressed.");
-            Contract.Requires<ArgumentException>(decompressedSize >= 0);
-            Contract.Requires<ArgumentNullException>(fileStream != null);
-            Contract.Requires<ArgumentException>(fileOffset >= 0);
-            Contract.Requires<ArgumentException>(fileSize >= 0);
+            if (!compressed && decompressedSize != fileSize) throw new ArgumentException($"{nameof(decompressedSize)} and {nameof(fileSize)} must be the same if the file isn't compressed.");
+            if (decompressedSize < 0) throw new ArgumentException(nameof(decompressedSize));
+            if (fileStream == null) throw new ArgumentNullException(nameof(fileSize));
+            if (fileOffset < 0) throw new ArgumentException(nameof(fileOffset));
+            if (fileSize < 0) throw new ArgumentException(nameof(fileSize));
 
             CurrentlyCompressed = compressed;
             DecompressedSize = decompressedSize;
@@ -109,7 +109,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public PacEntry(Pac archive, MixedString path, bool compressed, int decompressedSize, byte[] file, bool keepCompressed)
         {
-            Contract.Requires<ArgumentNullException>(archive != null);
+            if (archive == null) throw new ArgumentNullException(nameof(archive));
 
             Archive = archive;
             Path = path;
@@ -118,7 +118,7 @@ namespace Dash.FileFormats.IdeaFactory.PAC
 
         public PacEntry(Pac archive, MixedString path, bool compressed, int decompressedSize, Stream fileStream, int fileOffset, int fileSize, bool cacheFromStream, bool keepCompressed)
         {
-            Contract.Requires<ArgumentNullException>(archive != null);
+            if (archive == null) throw new ArgumentNullException(nameof(archive));
 
             Archive = archive;
             Path = path;

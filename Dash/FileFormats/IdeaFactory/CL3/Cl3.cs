@@ -43,8 +43,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void LoadFile(string path)
         {
-            Contract.Requires<ArgumentNullException>(path != null);
-            Contract.Requires<FileNotFoundException>(File.Exists(path));
+            if (path == null) throw new ArgumentNullException(nameof(path));
 
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -54,7 +53,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void LoadBytes(byte[] data)
         {
-            Contract.Requires<ArgumentNullException>(data != null);
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
             using (var stream = new MemoryStream(data))
             {
@@ -64,11 +63,9 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void LoadFromStream(Stream stream)
         {
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanRead);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
-            Contract.Requires<ArgumentException>(stream.Length - stream.Position >= 0x18); // Header Size, Minimum Required
-
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead || !stream.CanSeek || stream.Length - stream.Position >= 0x18) throw new ArgumentException(nameof(stream)); // Header Size, Minimum Required
+            
             using (var reader = new EndianBinaryReader(stream))
             {
                 if (!reader.ReadBytes(0x03).SequenceEqual(Magic))
@@ -175,7 +172,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void WriteFile(string path)
         {
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
+            if (path == null) throw new ArgumentNullException(nameof(path));
 
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             {
@@ -199,13 +196,13 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void WriteToStream(Stream stream, int customOffsetAlignment)
         {
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanWrite);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
-            Contract.Requires<DivideByZeroException>(customOffsetAlignment > 0);
-            Contract.Requires(Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION") == 1, "You must have one and only one FILE_COLLECTION section.");
-            Contract.Requires(Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_LINK") == 1, "You must have one and only one FILE_LINK section.");
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead || !stream.CanSeek) throw new ArgumentException(nameof(stream));
+            if (customOffsetAlignment == 0) throw new DivideByZeroException(nameof(customOffsetAlignment));
 
+            if (Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION") != 1) throw new FormatException("You must have one and only one FILE_COLLECTION section.");
+            if (Sections.Count(section => section.Name.ZeroTerminatedString == "FILE_LINK") != 1) throw new FormatException("You must have one and only one FILE_LINK section.");
+            
             var origin = stream.Position;
 
             using (var writer = new EndianBinaryWriter(stream, new UTF8Encoding(false, true), true, IsLittleEndian))
@@ -314,7 +311,7 @@ namespace Dash.FileFormats.IdeaFactory.CL3
 
         public void WriteFolder(string path)
         {
-            Contract.Requires<ArgumentNullException>(path != null);
+            if (path == null) throw new ArgumentNullException(nameof(path));
 
             var files = (Section<FileEntry>)Sections.FirstOrDefault(section => section.Name.ZeroTerminatedString == "FILE_COLLECTION");
             if (files == null)

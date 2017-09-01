@@ -45,8 +45,8 @@ namespace Dash.FileFormats.Valve.VDF
         /// <returns>A VDF string representation of the object.</returns>
         public static string Serialize(IDictionary<string, object> values, int indentationLevel)
         {
-            Contract.Requires<ArgumentNullException>(values != null);
-            Contract.Requires<ArgumentException>(indentationLevel >= 0, $"{nameof(indentationLevel)} must be a positive integer.");
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            if (indentationLevel < 0) throw new ArgumentException($"{nameof(indentationLevel)} must be a positive integer.");
 
             StringBuilder serializedVdf = new StringBuilder();
             var indentation = new string('\t', indentationLevel);
@@ -77,7 +77,7 @@ namespace Dash.FileFormats.Valve.VDF
         /// <returns>The deserialized <see cref="ExpandoObject"/> from the VDF string.</returns>
         public static ExpandoObject Deserialize(string value)
         {
-            Contract.Requires<ArgumentNullException>(value != null);
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             IDictionary<string, object> keyValues = new ExpandoObject();
 

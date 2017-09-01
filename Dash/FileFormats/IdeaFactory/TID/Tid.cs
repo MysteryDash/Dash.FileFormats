@@ -66,9 +66,6 @@ namespace Dash.FileFormats.IdeaFactory.TID
     
         public void LoadFile(string path)
         {
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
-            Contract.Requires<FileNotFoundException>(File.Exists(path));
-
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 LoadFromStream(stream);
@@ -77,8 +74,6 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         public void LoadBytes(byte[] data)
         {
-            Contract.Requires<ArgumentNullException>(data != null);
-
             using (var stream = new MemoryStream(data))
             {
                 LoadFromStream(stream);
@@ -87,10 +82,8 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         public void LoadFromStream(Stream stream)
         {
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanRead);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
-            Contract.Requires<ArgumentException>(stream.Length >= 0x80); // Header Size, Minimum Required
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanRead || !stream.CanSeek || stream.Length < 0x80) throw new ArgumentException(nameof(stream)); // Header Size, Minimum Required
 
             var origin = stream.Position;
 
@@ -175,8 +168,6 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         public void WriteFile(string path)
         {
-            Contract.Requires<ArgumentNullException>(!string.IsNullOrWhiteSpace(path));
-
             using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
             {
                 WriteToStream(stream);
@@ -194,12 +185,13 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         public void WriteToStream(Stream stream)
         {
-            Contract.Requires<Exception>(Loaded);
-            Contract.Requires<ArgumentNullException>(stream != null);
-            Contract.Requires<ArgumentException>(stream.CanWrite);
-            Contract.Requires<ArgumentException>(stream.CanSeek);
-            Contract.Requires<CompressionException>(Compression == CompressionAlgorithm.None, "Compressing is not yet supported !");
-            Contract.Requires<CompressionException>(Compression == CompressionAlgorithm.None ? Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.UncompressedOnly : Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.CompressedOnly);
+            if (!Loaded) throw new Exception($"{nameof(Tid)} is not loaded.");
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (!stream.CanWrite || !stream.CanSeek) throw new ArgumentException(nameof(stream)); // Header Size, Minimum Required
+
+            if (Compression != CompressionAlgorithm.None) throw new NotImplementedException("Compression is not yet supported.");
+            if (!(Compression == CompressionAlgorithm.None ? Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.UncompressedOnly : Versions[Version] == CompressionState.Both || Versions[Version] == CompressionState.CompressedOnly))
+                throw new CompressionException("Incorrect algorithm for specified verison.");
 
             var origin = stream.Position;
 
@@ -282,6 +274,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
             }
         }
 
+        /*
         [ContractInvariantMethod]
         private void ObjectInvariant()
         {
@@ -289,5 +282,6 @@ namespace Dash.FileFormats.IdeaFactory.TID
             Contract.Invariant(!Loaded || Filename.Length <= 0x20);
             Contract.Invariant(!Loaded || Versions.ContainsKey(Version));
         }
+        */
     }
 }

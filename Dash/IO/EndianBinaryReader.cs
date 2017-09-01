@@ -42,9 +42,9 @@ namespace Dash.IO
 
         public EndianBinaryReader(Stream input, Encoding encoding, bool leaveOpen, bool isLittleEndian)
         {
-            Contract.Requires<ArgumentNullException>(input != null);
-            Contract.Requires<ArgumentException>(input.CanRead);
-            Contract.Requires<ArgumentNullException>(encoding != null);
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            if (!input.CanRead) throw new ArgumentException(nameof(input));
+            if (encoding == null) throw new ArgumentNullException(nameof(encoding));
 
             BaseStream = input;
             _littleEndianReader = new BinaryReader(input, encoding, leaveOpen);
