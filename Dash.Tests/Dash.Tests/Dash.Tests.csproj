@@ -85,6 +85,9 @@
     <None Include="Samples\TID\0051_DXT5.tid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Samples\TID\011_002_DXT1.tid">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Samples\TID\win.tid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -105,6 +108,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Samples\TID\0051_DXT5.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Samples\TID\011_002_DXT1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
