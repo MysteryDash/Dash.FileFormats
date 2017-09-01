@@ -21,7 +21,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
     /// <summary>
     /// This class provides methods to handle .TID files.
     /// </summary>
-    public class Tid
+    public class Tid : IDisposable
     {
         public static readonly Dictionary<int, CompressionState> Versions = new Dictionary<int, CompressionState>
         {
@@ -282,5 +282,10 @@ namespace Dash.FileFormats.IdeaFactory.TID
             Contract.Invariant(!Loaded || Versions.ContainsKey(Version));
         }
         */
+
+        public void Dispose()
+        {
+            Bitmap.Dispose();
+        }
     }
 }
