@@ -23,6 +23,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
 
         [Theory]
         [InlineData("win.tid", "win.png")]
+        [InlineData("0051_DXT5.tid", "0051_DXT5.png")]
         public void Load_FromTid(string inputFilename, string modelFilename, double similarityLevel = 1.0)
         {
             var inputPath = Path.Combine(BasePath, inputFilename);
@@ -47,6 +48,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
         [InlineData("win.png", "win.tid", CompressionAlgorithm.None, 0x90)]
         [InlineData("win.png", "win.tid", CompressionAlgorithm.Dxt1, 0x90, true)]
         [InlineData("win.png", "win.tid", CompressionAlgorithm.Dxt5, 0x90, true)]
+        [InlineData("0051_DXT5.png", "0051_DXT5.tid", CompressionAlgorithm.None, 0x90)]
         public void Write_FromPng(string inputFilename, string modelFilename, CompressionAlgorithm compression, byte version, bool failExpected = false)
         {
             var inputPath = Path.Combine(BasePath, inputFilename);
