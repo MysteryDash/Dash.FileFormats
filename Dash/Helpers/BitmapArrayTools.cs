@@ -5,7 +5,6 @@
 //
 
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Dash.Helpers
 {
