@@ -1,0 +1,9 @@
+AppState
+{
+	name		KerbalSpaceProgram
+	StateFlags		4
+	UserConfig
+	{
+		language		english
+	}
+}
