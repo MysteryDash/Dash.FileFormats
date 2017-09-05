@@ -4,12 +4,11 @@
 // Written originally by Alexandre Quoniou in 2016.
 //
 
-namespace Dash.FileFormats.IdeaFactory.TID
+namespace Dash.Compression.DXT
 {
-    public enum CompressionAlgorithm
+    public enum DxtCompression
     {
-        None = 0,
-        Dxt1 = 827611204,
-        Dxt5 = 894720068
+        Dxt1,
+        Dxt5
     }
 }

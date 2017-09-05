@@ -48,9 +48,13 @@ The following people are contributors of this project :
 ## Versioning
 
 We use [Semantic Versioning 2.0.0](http://semver.org/) for versioning.  
-The current version of this project is the 3.0.0-alpha.
+The current version of this project is the 3.0.0-alpha.1.
 
 ## License
 
 This project is licensed under the Simple Non Code License 2.1.0.  
 See the [License.txt](License.txt) file for details.
+
+## Links
+
+- [DXT decompression written in assembly & C++ by Matej Tomčík](http://www.matejtomcik.com/Public/KnowHow/DXTDecompression/)

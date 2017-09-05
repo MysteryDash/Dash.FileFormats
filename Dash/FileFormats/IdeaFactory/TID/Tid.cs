@@ -12,9 +12,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Dash.Compression;
+using Dash.Compression.DXT;
 using Dash.Helpers;
 using Dash.IO;
-using ManagedSquish;
 
 namespace Dash.FileFormats.IdeaFactory.TID
 {
@@ -142,13 +142,14 @@ namespace Dash.FileFormats.IdeaFactory.TID
                 }
                 else
                 {
-                    data = Squish.DecompressImage(data, width, height, compression.ToSquishFlags());
-                    data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
-                }
-
-                if (compression == CompressionAlgorithm.Dxt1)
-                {
-                    data = BitmapArrayTools.Fill32BppAlpha(data, 0, 0xFF);
+                    if (compression == CompressionAlgorithm.Dxt1)
+                    {
+                        data = DxtDecompressor.DecompressDxt(data, width, height, DxtCompression.Dxt1);
+                    }
+                    else
+                    {
+                        data = DxtDecompressor.DecompressDxt(data, width, height, DxtCompression.Dxt5);
+                    }
                 }
 
                 var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
@@ -239,8 +240,9 @@ namespace Dash.FileFormats.IdeaFactory.TID
                 }
                 else
                 {
+                    throw new NotImplementedException();
                     data = BitmapArrayTools.Swap32BppColorChannels(data, 2, 1, 0, 3);
-                    data = Squish.CompressImage(data, Width, Height, Compression.ToSquishFlags()); // TODO : This line throws a FatalExecutionEngineError for an unknown reason
+                    //data = Squish.CompressImage(data, Width, Height, Compression.ToSquishFlags()); TODO : This line throws a FatalExecutionEngineError for an unknown reason
                 }
 
                 writer.Write(data.Length);
