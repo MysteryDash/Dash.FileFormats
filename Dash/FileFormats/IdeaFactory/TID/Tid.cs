@@ -109,7 +109,7 @@ namespace Dash.FileFormats.IdeaFactory.TID
                 int compressionValue = reader.ReadInt32();
                 if (!Enum.IsDefined(typeof (CompressionAlgorithm), compressionValue))
                     throw new CompressionException($"{compressionValue} represents an incorrect or unknown compression algorithm.");
-                CompressionAlgorithm compression = (CompressionAlgorithm) compressionValue;
+                CompressionAlgorithm compression = (CompressionAlgorithm)compressionValue;
 
                 if (stream.Length < 0x80 + dataLength)
                     throw new EndOfStreamException();

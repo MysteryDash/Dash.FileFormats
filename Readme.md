@@ -1,8 +1,8 @@
-# File Formats (aka Dash.FileFormats)
+# File Formats (aka Dash.FileFormats) [![License](https://img.shields.io/:license-SNCL%202.1.0-blue.svg)](https://raw.githubusercontent.com/MysteryDash/Simple-Non-Code-License/master/License.txt)  
 
 This project has been made to open, read, edit and create files from uncommon formats found within various games and software.
 
-## Do you like my project ? [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](http://paypal.me/MysteryDash/5) [![License](https://img.shields.io/:license-SNCL%202.1.0-blue.svg)](https://raw.githubusercontent.com/MysteryDash/Simple-Non-Code-License/master/License.txt) 
+## Do you like my project ? [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](http://paypal.me/MysteryDash/5)  
 
 ## What we can do for now with the library
 
@@ -25,7 +25,7 @@ You can still download them from my old commits though.
 
 We still have a long way to go ! Here's what we need to do :
 * Add compression support for .PAC.
-* Fix DXT1/5 compression for .TID which isn't working for an unknown reason.
+* Fix DXT1/5 compression for .TID which isn't working for an unknown reason (almost done).
 * Find an alternative to Neptoolia.Datalayer.Decompressor.
 * Test everything.
 * Add XML comments.
@@ -48,7 +48,7 @@ The following people are contributors of this project :
 ## Versioning
 
 We use [Semantic Versioning 2.0.0](http://semver.org/) for versioning.  
-The current version of this project is the 3.0.0-alpha.1.
+The current version of this project is the 3.0.0-alpha.2.
 
 ## License
 
@@ -58,3 +58,4 @@ See the [License.txt](License.txt) file for details.
 ## Links
 
 - [DXT decompression written in assembly & C++ by Matej Tomčík](http://www.matejtomcik.com/Public/KnowHow/DXTDecompression/)
+- [rygDXT real-time DXT compressor by Fabian "ryg" Giesen](https://github.com/nothings/stb/blob/master/stb_dxt.h)
